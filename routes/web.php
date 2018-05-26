@@ -11,6 +11,10 @@
 |
 */
 
+use \App\User;
+use \App\Album;
+use \App\Photo;
+
 // Posso risolvere la rotta con una funzione anonima clousure o con un controller
 
 Route::get('/', function () {
@@ -22,7 +26,7 @@ Route::get('/controller', 'welcomeController@index'); // nome_controller@nome_me
 
 
 // i parametri ricaravi dall'url vengono automaticamente passati al metodo del controller
-Route::get('/{name?}/{surname?}/{age?}', 'welcomeController@user')->where([
+Route::get('welcome/{name?}/{surname?}/{age?}', 'welcomeController@user')->where([
     'name' => '[A-Za-z]+',
     'surname' => '[A-Za-z]+',
     'age' => '[0-9]{1,3}',
@@ -41,4 +45,20 @@ Route::get('/string', function () {
 
 Route::get('/json', function () {
   return ['Hello', 'World'];
+});
+
+Route::get('/albums', 'AlbumsController@index' );
+
+// sia per mostrare un singolo album, sia per eliminalo utilizzo lo stesso url ma per mostrare un album laravel si
+// aspetta una chiamata via get, mentre per eliminarlo devo necessariamente fare una chiamata delete
+Route::get('/albums/{id}', 'AlbumsController@show' );
+Route::delete('/albums/{id}', 'AlbumsController@delete' );
+Route::patch('/albums/{id}', 'AlbumsController@update' );
+
+Route::get('/users', function () {
+  return User::all();
+});
+
+Route::get('/photos', function () {
+  return Photo::all();
 });

@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Album;
 
-class DatabaseSeeder extends Seeder
+class SeedAlbumTable extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,10 +14,8 @@ class DatabaseSeeder extends Seeder
     {
 
       DB::statement('SET FOREIGN_KEY_CHECKS=0');
+      Album::truncate();
 
-      $this->call(SeedUserTable::class);
-      $this->call(SeedAlbumTable::class);
-      $this->call(SeedPhotoTable::class);
-
+      factory(Album::class, 20)->create();
     }
 }

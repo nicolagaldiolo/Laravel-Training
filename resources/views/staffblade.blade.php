@@ -6,14 +6,14 @@
 
   @include('partials.jumbotron', ['contenuto' => 'Contenuto del jumbotron'])
 
-  @component('components.alert', ['type' => 'success', 'other_var' => 'Altra variabile']) {{-- chiamo il componente e passo le mie variabili con array (se non le passo si incazza), ciò che passo come content viene catturato dalla variabile {{$slot}} --}}
+  @component('components.alert_demo', ['type' => 'success', 'other_var' => 'Altra variabile']) {{-- chiamo il componente e passo le mie variabili con array (se non le passo si incazza), ciò che passo come content viene catturato dalla variabile {{$slot}} --}}
     The content of the alert component
   @endcomponent
 
-  @component('components.alert', ['type' => 'warning', 'other_var' => 'Altra variabile']) {{-- posso anche evitare il content --}}
+  @component('components.alert_demo', ['type' => 'warning', 'other_var' => 'Altra variabile']) {{-- posso anche evitare il content --}}
   @endcomponent
 
-  @component('components.alert') {{-- chiamo il componente e passo le mie variabili non come array ma con metodo slot (se non le passo si incazza), ciò che passo come content viene catturato dalla variabile {{$slot}} --}}
+  @component('components.alert_demo') {{-- chiamo il componente e passo le mie variabili non come array ma con metodo slot (se non le passo si incazza), ciò che passo come content viene catturato dalla variabile {{$slot}} --}}
     @slot('type', 'info')
     @slot('other_var', 'Altra variabile')
     The content of the alert component

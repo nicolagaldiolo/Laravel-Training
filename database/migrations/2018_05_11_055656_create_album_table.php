@@ -16,6 +16,7 @@ class CreateAlbumTable extends Migration
         Schema::create('albums', function (Blueprint $table) {
             $table->increments('id');
             $table->string('album_name', 128);
+            $table->string('album_thumb');
             $table->text('description');
             // inserisco un campo che fa riferimento all'id dell'utente
             $table->integer('user_id')->unsigned();

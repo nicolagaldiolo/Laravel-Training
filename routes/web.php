@@ -47,16 +47,31 @@ Route::get('/json', function () {
   return ['Hello', 'World'];
 });
 
-Route::get('/albums', 'AlbumsController@index' );
-
+// con name definisco il nome della rotta, così se l'url dovesse cambiare il path
+// di quella rotta, il riferimento rimane invariato, mi è comodo per i link o redirect.
+Route::get('/albums', 'AlbumsController@index' )->name('albums');
+Route::post('/albums', 'AlbumsController@save' )->name('album.save');
 // sia per mostrare un singolo album, sia per eliminalo utilizzo lo stesso url ma per mostrare un album laravel si
 // aspetta una chiamata via get, mentre per eliminarlo devo necessariamente fare una chiamata delete
-Route::get('/albums/{id}', 'AlbumsController@show' );
+Route::get('/albums/{id}', 'AlbumsController@show' )->where('id', '[0-9]+');
+Route::get('/albums/create', 'AlbumsController@create' )->name('album.create');
 Route::delete('/albums/{id}', 'AlbumsController@delete' );
 Route::patch('/albums/{id}', 'AlbumsController@update' );
 
 Route::get('/users', function () {
   return User::all();
+});
+
+Route::get('/usersnoalbum/', function(){
+    $usernoalbum = DB::table('users as u')
+        ->select('u.id', 'u.email', 'u.name')
+        ->leftJoin('albums as a', 'u.id', 'a.user_id')
+        ->whereNull('a.album_name') // laravel mi mette a disposizione una serie di metodi ad esempio per controllare al volo se il valore passato è null
+        //->where('a.album_name', '=', 'null') // oppure posso dichiarare la condizione classica (nel caso di uguale non serve passare il parametro di confronto)
+        //->whereRaw('a.album_name is null') // oppure posso scrivere la query grezza se devo fare qualcosa di particolare e non ho un metodo per farlo
+        ->get();
+
+    return $usernoalbum;
 });
 
 Route::get('/photos', function () {

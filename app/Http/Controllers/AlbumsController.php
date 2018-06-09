@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Album;
+use App\Photo;
 use Illuminate\Http\Request;
 use Storage;
 //use DB; // non uso più la facade DB perchè utilizzo sempre il Model
@@ -15,7 +16,11 @@ class AlbumsController extends Controller
         //Posso recuperare i dati in 3 modi, utilizzando model, utilizzando direttamente il query builder o con delle query grezze:
 
         // MODEL
-        $queryBuilder = Album::orderBy('id', 'desc');
+        //$queryBuilder = Album::orderBy('id', 'desc')->with('photos'); // con il metodo with, passando il nome della relazione
+        // viene aggiunto all'oggetto album anche un attributo relations dove all'inteno c'è l'array di tutte le foto
+        $queryBuilder = Album::orderBy('id', 'desc')->withCount('photos'); // con withCount non mi viene tornato l'elenco delle foto ma semplicemente viene aggiunto un nuovo attributo, come se fosse un nuovo campo, con il numero delle foto
+
+
         if ($request->has('id')) {
             //$album -> where('id', '=', $request->input('id'));
             $queryBuilder->where('id', $request->get('id')); // se la condizione è uguale posso omettere il segno uguale
@@ -23,7 +28,9 @@ class AlbumsController extends Controller
         if ($request->has('album_name')) {
             $queryBuilder->where('album_name', 'like', '%' . $request->get('album_name') . '%');
         }
-        $album = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
+        //$album = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
+        $album = $queryBuilder->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
+
 
         /*
         // QUERY BUILDER
@@ -53,8 +60,9 @@ class AlbumsController extends Controller
         }
         $sql .= " ORDER BY id DESC";
         $album = DB::select($sql, $where);
-        //dd($album);
         */
+
+        //dd($album);
 
         return view('albums.albums', ['data' => $album]);
     }
@@ -190,6 +198,7 @@ class AlbumsController extends Controller
 
     function delete(Album $id) // effettuo il type hinting dell'album, associo il modello ad un parametro della rotta,
         // gratis laravel associa alla variabile id l'album e me lo filtra già con la primaryKey ricevuta dalla rotta.
+        // NB: il parametro passato, in questo caso $id devo matchare con il parametro della rotta altrimenti con funziona
     {
         /*$response = '';
         if ($id) {
@@ -212,16 +221,18 @@ class AlbumsController extends Controller
 
         $response = $id->delete();
         if($response){
-            $disc = config('filesystems.default'); // recupero dal file di configurazione il disco utilizzato
-            $thumbnail = $id->album_thumb;
-            if($thumbnail && Storage::disk($disc)->has($thumbnail)){ // se esiste la thumb sul db e sul disco
-                Storage::disk($disc)->delete($thumbnail); // elimino la thumb da disco
-            }
+            $this->deleteImage($id->album_thumb);
         }
 
         // dato che viene invocato via ajax torno $response
         return (string) $response;
 
+    }
+
+    function getImages(Album $album){
+        //$images = Photo::where('album_id', $album->id)->get(); // se li voglio tutti
+        $images = Photo::where('album_id', $album->id)->orderBy('created_at', 'desc')->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
+        return view('photos.images', compact('images','album'));
     }
 
     public function processFile($id, $album){
@@ -244,5 +255,13 @@ class AlbumsController extends Controller
         $album->album_thumb = $filePath;
 
         return true;
+    }
+
+    public function deleteImage($thumbnail = null){
+        $disc = config('filesystems.default'); // recupero dal file di configurazione il disco utilizzato
+        if($thumbnail && Storage::disk($disc)->has($thumbnail)){ // se esiste la thumb sul db e sul disco
+            return Storage::disk($disc)->delete($thumbnail); // elimino la thumb da disco
+        }
+        return false;
     }
 }

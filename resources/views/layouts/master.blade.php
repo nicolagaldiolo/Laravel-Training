@@ -36,6 +36,9 @@
         <a class="nav-link" href="/albums">Albums</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="{{route('photos.create')}}">New photo</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>
       </li>
       <li class="nav-item dropdown">

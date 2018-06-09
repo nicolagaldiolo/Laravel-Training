@@ -54,9 +54,14 @@ Route::post('/albums', 'AlbumsController@save' )->name('album.save');
 // sia per mostrare un singolo album, sia per eliminalo utilizzo lo stesso url ma per mostrare un album laravel si
 // aspetta una chiamata via get, mentre per eliminarlo devo necessariamente fare una chiamata delete
 Route::get('/albums/{id}', 'AlbumsController@show' )->where('id', '[0-9]+');
+Route::get('/albums/{album}/images', 'AlbumsController@getImages' )->where('id', '[0-9]+')->name('albumImages');
 Route::get('/albums/create', 'AlbumsController@create' )->name('album.create');
 Route::delete('/albums/{id}', 'AlbumsController@delete' );
 Route::patch('/albums/{id}', 'AlbumsController@update' );
+
+
+Route::resource('photos', 'PhotosController'); // In automatico laravel mi crea tutte le rotte necessarie per gestire il crud, basta lanciare $ php artisan route:list per vedere l'elenco delle rotte create
+
 
 Route::get('/users', function () {
   return User::all();
@@ -72,8 +77,4 @@ Route::get('/usersnoalbum/', function(){
         ->get();
 
     return $usernoalbum;
-});
-
-Route::get('/photos', function () {
-  return Photo::all();
 });

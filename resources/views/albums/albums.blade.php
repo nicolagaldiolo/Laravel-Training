@@ -23,12 +23,16 @@
                   Album che mi torna il path del file. $album->path mappa magicamente il metodo get|Path|Attribute
                 --}}
                 {{--<img width="120" src="{{asset('storage/'.$album->album_thumb)}}" alt="{{$album->album_name}}">--}}
-                <img width="120" src="{{asset($album->path)}}" alt="{{$album->album_name}}">
+                <img width="120" src="{{asset($album->album_thumb)}}" alt="{{$album->album_name}}">
               @endif
               <h5 class="mb-1">{{$album->album_name}}</h5>
               <p class="mb-1">{{$album->description}}</p>
             </div>
             <small>
+              <a href="{{route('photos.create')}}?aid={{$album->id}}"><i class="fas fa-plus-circle fa-2x"></i> New image</a>
+              @if($album->photos_count > 0)
+              <a href="{{route('albumImages', $album->id)}}"><i class="far fa-images fa-2x"></i> ({{$album->photos_count}})</a>
+              @endif
               <a href="/albums/{{$album->id}}"><i class="fas fa-pencil-alt fa-2x"></i></a>
               <a class="delete" href="/albums/{{$album->id}}"><i class="far fa-trash-alt fa-2x"></i></a>
             </small>
@@ -37,6 +41,14 @@
       @endforeach
     </ul>
   @endif
+
+  <div>
+    {{-- {{$images->links('vendor.pagination.bootstrap-4')}}
+        || bootstrap-4 | default | semantic-ui | ecc
+        posso specificare un determinato template per la paginazione, oppure usare quello standard
+    --}} {{$data->links()}}
+
+  </div>
 
   <a class="btn btn-primary btn-lg btn-block" href="{{route('album.create')}}">Crate Album</a>
 

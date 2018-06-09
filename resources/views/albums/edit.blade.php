@@ -16,13 +16,7 @@
       <label>Album Description</label>
       <textarea class="form-control" placeholder="Album description" name="description">{{$data->description}}</textarea>
     </div>
-    <div class="form-group">
-      <label>Album thumb</label>
-      <input type="file" class="form-control" placeholder="Album thumb" name="album_thumb">
-      @if($data->album_thumb)
-        <img width="300" src="{{asset($data->path)}}" alt="{{$data->album_name}}">
-      @endif
-    </div>
+    @include('albums.partials.fileupload')
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
 @stop

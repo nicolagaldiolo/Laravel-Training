@@ -30,14 +30,16 @@
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/albums">Albums</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{route('photos.create')}}">New photo</a>
-      </li>
+      @auth {{-- uso la nuova direttiva per vedere se l'utente è loggato: https://laravel-news.com/laravel-v5-4-29 --}}
+        <li class="nav-item">
+          <a class="nav-link" href="{{route('albums')}}">Albums</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{route('photos.create')}}">New photo</a>
+        </li>
+      @endauth
       <li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>
       </li>
@@ -51,10 +53,38 @@
         </div>
       </li>
     </ul>
-    <form class="form-inline my-2 my-lg-0">
+
+    <!-- Right Side Of Navbar -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Authentication Links -->
+      @guest
+        <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+        <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li>
+      @else
+        <li class="nav-item dropdown">
+          <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+            {{ Auth::user()->name }} <span class="caret"></span>
+          </a>
+
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{{ route('logout') }}"
+               onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+              {{ __('Logout') }}
+            </a>
+
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+              @csrf
+            </form>
+          </div>
+        </li>
+      @endguest
+    </ul>
+
+    {{--<form class="form-inline my-2 my-lg-0">
       <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
       <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-    </form>
+    </form>--}}
   </div>
 </nav>
 

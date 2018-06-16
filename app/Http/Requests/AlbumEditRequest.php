@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Album;
+use Gate;
 
-class AlbumRequest extends FormRequest
+class AlbumEditRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,9 +29,9 @@ class AlbumRequest extends FormRequest
             return false;
         }
         return true;
-
         */
         return true;
+
     }
 
     /**
@@ -40,20 +42,21 @@ class AlbumRequest extends FormRequest
     public function rules()
     {
         return [
-            'album_name'    => 'required|unique:albums,album_name',
+            'album_name'    => 'required',
             'description'   => 'required',
-            'album_thumb'   => 'required|image',
+            //'album_thumb'   => 'required|image',
             //'user_id'       => 'required'
         ];
     }
-}
 
-/*
-// definisco dei messaggi di errore custom
-protected $custom_error_messages = [
-    'album_id.required'      => 'Campo album_id obbligatorio',
-    'name.required'          => 'Campo name obbligatorio',
-    'description.required'   => 'Campo description obbligatorio',
-    'img_path.required'      => 'Campo img_path obbligatorio'
-];
-*/
+    /*
+    // definisco dei messaggi di errore custom
+    protected $custom_error_messages = [
+        'album_id.required'      => 'Campo album_id obbligatorio',
+        'name.required'          => 'Campo name obbligatorio',
+        'description.required'   => 'Campo description obbligatorio',
+        'img_path.required'      => 'Campo img_path obbligatorio'
+    ];
+    */
+
+}

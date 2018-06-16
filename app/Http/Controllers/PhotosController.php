@@ -6,6 +6,7 @@ use App\Album;
 use App\Photo;
 use Illuminate\Http\Request;
 use Storage;
+use Auth;
 
 class PhotosController extends Controller
 {
@@ -13,7 +14,7 @@ class PhotosController extends Controller
     // definisco le regole di validazione per i vari campi
     protected $rules = [
         'album_id'      => 'required|exists:albums,id',
-        'name'          => 'required|unique:photos:name',
+        'name'          => 'required|unique:photos,name',
         'description'   => 'required',
         'img_path'      => 'required|image'
     ];
@@ -25,6 +26,14 @@ class PhotosController extends Controller
         'description.required'   => 'Campo description obbligatorio',
         'img_path.required'      => 'Campo img_path obbligatorio'
     ];
+
+
+    public function __construct(){
+        //proteggo tutti i metodi del controller chiamando authorizeResource nel costruttore passando il modello
+        $this->authorizeResource(Photo::class);
+        // altrimenti potrei proteggee il singolo metodo chiamando: $this->authorize($photo); all'interno del singolo metodo
+    }
+
 
     /**
      * Display a listing of the resource.
@@ -55,7 +64,7 @@ class PhotosController extends Controller
         // l'edit che per il new photo e nell'edit photo ho l'oggetto photo valorizzato. nel caso nel new photo non ho
         // la variabile $photo valorizzata quindi per evitare l'errore creo un instanza "vuota".
 
-        $albumList = $this->getAlbums();
+        $albumList = $this->getAlbums($req);
 
         //dd($album);
 
@@ -107,11 +116,11 @@ class PhotosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Photo $photo)
+    public function edit(Request $request, Photo $photo)
     {
 
         $album = $photo->album; // torna la relazione, i dati dell'album
-        $albumList = $this->getAlbums();
+        $albumList = $this->getAlbums($request);
 
         return view('photos.editCreate', compact('albumList', 'album', 'photo'));
     }
@@ -128,7 +137,7 @@ class PhotosController extends Controller
 
         $this->validate($request, $this->rules);
 
-        dd('passato');
+        //dd('passato');
 
         $this->processFile($photo);
         $photo->name = $request->input('name');
@@ -160,8 +169,13 @@ class PhotosController extends Controller
 
     }
 
-    public function getAlbums(){
-        return Album::orderBy('album_name')->get();
+    public function getAlbums($request){
+
+        // Per RECUPERARE I DATI DELLO USER posso fare in due modi, con la facade Auth, oppure vi viene cmq iniettato nella request
+        // 1- tramite Request $request->user();
+        // 2- tramite Facade Auth Request Auth::user(); (attenzione che usando la facade deve prima essere importata (=use Auth;))
+
+        return Album::orderBy('album_name')->where('user_id', Auth::user()->id)->get();
     }
 
     public function deleteImage($thumbnail = null){

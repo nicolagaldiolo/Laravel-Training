@@ -1,7 +1,6 @@
 <?php
 
 namespace App;
-use App\Photo;
 use Illuminate\Database\Eloquent\Model;
 
 class Album extends Model
@@ -30,7 +29,7 @@ class Album extends Model
     }
 
     // mentre se creo un metodo sfruttuando i metodi magici getter, setter con la sintassi get|nomecampodbinCamelCase|Attribute():
-    // questo metodo viene invocato ogni volta che voglio accedere a questo attrbituo
+    // questo metodo viene invocato ogni volta che voglio accedere a questo attributo
     public function getAlbumThumbAttribute($value){
         // model accessor
         if(!stristr($value, 'http') || !stristr($value, 'https')){
@@ -44,6 +43,10 @@ class Album extends Model
         // il primo parametro è il nome della tabella con cui relazioniamo, il secondo campo è la chiave esterna, mentre il terzo parametro è la chiave della tabella corrente con cui fare il match
         // laravel di default cerca come foreignKey nometabella_id e come localKey il campo id quindi in questo caso viene rispettato lo standard ed il 2° e 3° parametro sono superflui
         return $this->hasMany(Photo::class); // $this->hasMany(Photo::class, 'album_id', 'id');
+    }
+
+    public function user(){ // dichiaro la relazione che un album appartiene ad un utente
+        return $this->belongsTo(User::class); // $this->belongsTo(User::class, 'user_id', 'id');
     }
 
 

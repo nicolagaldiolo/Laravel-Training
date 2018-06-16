@@ -4,14 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Album;
 use App\Photo;
+use App\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\AlbumRequest;
+use App\Http\Requests\AlbumEditRequest;
 use Storage;
+use Auth;
+use Gate;
 //use DB; // non uso più la facade DB perchè utilizzo sempre il Model
 
 class AlbumsController extends Controller
 {
+
+    function __construct()
+    {
+        // PROTEGGO IL CONTROLLER CON IL MIDDLEWARE AUTH, LO FACCIO QUI PER ANDARE IN DETTAGLIO SUI SONGOLI METODI,
+        // ALTRIMENTI POSSO FARE UN GRUPPO DI ROTTE E PROTEGGERE LE ROTTE
+
+        //$this->middleware('auth'); // proteggo tutti i metodi del controller
+        //$this->middleware('auth')->only('index'); // proteggo solo un metodo del controller
+        //$this->middleware('auth')->only(['index','create']); // proteggo solo alcuni del controller (passo array)
+        //$this->middleware('auth')->except('index'); // proteggo tutti i metodi eccetto uno o più metodi (se tanti uso array)
+    }
+
     function index(Request $request)
     {
+        // Per RECUPERARE I DATI DELLO USER posso fare in due modi, con la facade Auth, oppure vi viene cmq iniettato nella request
+        // 1- tramite Request $request->user();
+        // 2- tramite Facade Auth Request Auth::user(); (attenzione che usando la facade deve prima essere importata (=use Auth;))
 
         //Posso recuperare i dati in 3 modi, utilizzando model, utilizzando direttamente il query builder o con delle query grezze:
 
@@ -19,7 +39,7 @@ class AlbumsController extends Controller
         //$queryBuilder = Album::orderBy('id', 'desc')->with('photos'); // con il metodo with, passando il nome della relazione
         // viene aggiunto all'oggetto album anche un attributo relations dove all'inteno c'è l'array di tutte le foto
         $queryBuilder = Album::orderBy('id', 'desc')->withCount('photos'); // con withCount non mi viene tornato l'elenco delle foto ma semplicemente viene aggiunto un nuovo attributo, come se fosse un nuovo campo, con il numero delle foto
-
+        $queryBuilder->where('user_id', $request->user()->id);
 
         if ($request->has('id')) {
             //$album -> where('id', '=', $request->input('id'));
@@ -30,6 +50,8 @@ class AlbumsController extends Controller
         }
         //$album = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
         $album = $queryBuilder->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
+
+        //dd($album);
 
 
         /*
@@ -67,7 +89,7 @@ class AlbumsController extends Controller
         return view('albums.albums', ['data' => $album]);
     }
 
-    function show($id = '')
+    function show(Album $album, Request $request)
     {
 
         //$sql = "SELECT album_name, description FROM albums WHERE id = :id";
@@ -76,7 +98,36 @@ class AlbumsController extends Controller
         //$album = DB::table('albums')->where('id', $id)->get();
 
         //$album = Album::where('id', $id)->get(); // torna la collection con il dato
-        $album = Album::find($id); // torna l'oggetto Album
+        $album = Album::find($album->id); // torna l'oggetto Album
+
+        /////////// CONTROLLO AUTORIZZAZIONE AD ACCEDERE ALL'ALBUM ////////
+
+        /// Metodo 1
+        //if( $request->user()->id != $album->user->id){ // per recuperare l'id dell'utente o me lo ricavo dalla request (devo passare al metodo la request)
+        //if( $album->user->id !== Auth::user()->id){ // oppure utilizzo la facade Auth (previa importazione della facade)
+        //  abort(401, 'Non sei autorizzato ad accedere a questa risorsa.');
+        //}
+
+        /// Metodo 2 utilizzando i gates (CONSIGLIATO) utilizzando i metodi denies o allows
+        // se il gate manage-album definito in Providers/AuthServiceProvider torna false allora abortisco
+        //if( Gate::denies('manage-album', $album)){
+        //    abort(401, 'Non sei autorizzato ad accedere a questa risorsa.');
+        //}
+
+        /// Metodo 3 posso includere il GATE anche direttamente nella mia classe request custom all'interno del metodo authorize() es: AlbumEditRequest.php, AlbumRequest.php ecc ecc
+
+        /// Metodo 4 chiamo la policy e passo l'oggetto album
+            $this->authorize($album);
+            // automatico laravel mappa il metodo corrente con il corrispettivo metodo nella policy, vedi mappatura dei metodi
+            // all'interno della policy, ma se volessi puntare ad un particolare metodo della policy faccio così:
+            // $this->authorize('nomeMetodoPolicy', $album);
+
+            //Potrei automaticamente proteggere tutti i metodi del controller chiamando authorizeResource nel costruttore passando il modello:
+            //$this->authorizeResource(Album::class);
+
+
+
+
 
         return view('albums.edit', ['data' => $album]);
     }
@@ -87,7 +138,8 @@ class AlbumsController extends Controller
         return view('albums.create');
     }
 
-    function save()
+    function save( AlbumRequest $request) // utilizzo una classe custom per la validazione, una classe che estende
+        // formRequest che estende Request in modo da avere i validatori sui campi
     {
 
         // PER RECUPERARE I VALORI DALLA REQUEST POSSO FARE IN VARI MODI:
@@ -124,10 +176,13 @@ class AlbumsController extends Controller
 // MODEL 2
         //in alternativa posso creare una nuova instanza del model Album e creare il record, in qeusto modo non devo neanche dichiarare i campi fillable
         $album = new Album;
-        $album->album_name = request()->get('album_name');
-        $album->description = request()->get('description');
+
+        $this->authorize('create', $album);
+
+        $album->album_name = $request->get('album_name');
+        $album->description = $request->get('description');
         $album->album_thumb = '';
-        $album->user_id = 1;
+        $album->user_id = $request->user()->id;
         $res = $album->save();
 
         // siccome ho precedentemente salvato l'album, e quindi ho un id lo posso passare alla funzione
@@ -142,7 +197,7 @@ class AlbumsController extends Controller
 
     }
 
-    function update($id = '')
+    function update(AlbumEditRequest $request, $id = '')
     { // avrei potuto passarmi l'id come campo input ma lo posso estrarre dall'url
 
         // PER RECUPERARE I VALORI DALLA REQUEST POSSO FARE IN VARI MODI:
@@ -182,8 +237,11 @@ class AlbumsController extends Controller
 
 // MODEL 3
         $album = Album::find($id);
-        $album->album_name = request()->get('album_name');
-        $album->description = request()->get('description');
+
+        $this->authorize($album);
+
+        $album->album_name = $request->get('album_name');
+        $album->description = $request->get('description');
 
         $this->processFile($id, $album);
 
@@ -230,6 +288,7 @@ class AlbumsController extends Controller
     }
 
     function getImages(Album $album){
+        $this->authorize('view', $album);
         //$images = Photo::where('album_id', $album->id)->get(); // se li voglio tutti
         $images = Photo::where('album_id', $album->id)->orderBy('created_at', 'desc')->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
         return view('photos.images', compact('images','album'));

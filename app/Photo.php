@@ -8,7 +8,7 @@ class Photo extends Model
 {
 
 
-    // creo la relazione tra la foto e l'alnum dichiarando che una foto appartiene ad un album
+    // creo la relazione tra la foto e l'album dichiarando che una foto appartiene ad un album
     public function album(){
         // ritorno una relazione
         //return $this->belongsTo(Album::class, 'album_id', 'id');

@@ -3,20 +3,8 @@
 @section('title', 'Pagina in BLADE')
 
 @section('content')
-    <!-- nella vista viene iniettata l'oggetto errors che con $errors->any() so se ci sono errori e
-    con $errors->all() mi viene tornato l'array degli errori -->
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    @endif
+
+    @include('partials.validatemessage')
 
     @if($photo->id)
         <h1>Edit photo</h1>
@@ -59,5 +47,6 @@
             @include('photos.partials.fileupload')
 
             <button type="submit" class="btn btn-primary">Submit</button>
+            <a href="{{route('albums')}}" class="btn btn-secondary">Annulla</a>
         </form>
 @stop

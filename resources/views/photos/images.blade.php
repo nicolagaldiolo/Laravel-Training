@@ -10,27 +10,25 @@
         @endcomponent
     @endif
 
-    <h1>Images for {{$album->album_name}}</h1>
+    <h1>Images for {{$album->album_name}} <a href="{{route('albums')}}" class="btn btn-link">Torna agli album</a></h1>
 
     <table class="table table-responsive table-striped">
         <tr>
-            <th>Id</th>
-            <th>Created date</th>
-            <th>Name</th>
+            <th>Created At</th>
+            <th>Title</th>
             <th>Album</th>
-            <th>Image</th>
-            <th>Action</th>
+            <th>Thumbnail</th>
+            <th></th>
         </tr>
         @forelse($images as $image)
             <tr>
-                <td>{{$image->id}}</td>
-                <td>{{$image->created_at}}</td>
+                <td>{{$image->created_at->diffForHumans()}}</td>
                 <td>{{$image->name}}</td>
-                <td><a href="/albums/{{$album->id}}">{{$album->album_name}}</a></td>
+                <td><a href="{{route('album.update', $album->id)}}">{{$album->album_name}}</a></td>
                 <td><img width="100" src="{{asset($image->img_path)}}"></td>
                 <td>
-                    <a href="{{route('photos.edit', $image->id)}}"><i class="fas fa-pencil-alt fa-2x"></i></a>
-                    <a class="delete" href="{{route('photos.destroy', $image->id)}}"><i class="far fa-trash-alt fa-2x"></i></a>
+                    <a class="btn btn-primary" href="{{route('photos.edit', $image->id)}}"><i class="fas fa-pencil-alt"></i></a>
+                    <a class="btn btn-danger delete" href="{{route('photos.destroy', $image->id)}}"><i class="far fa-trash-alt"></i></a>
                 </td>
             </tr>
             @empty

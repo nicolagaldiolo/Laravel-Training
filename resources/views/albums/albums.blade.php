@@ -11,35 +11,53 @@
   @endif
 
   @if($data)
-    <ul id="album_list" class="list-group">
+    <table class="table table-striped">
+      <tr>
+        <th>Created at</th>
+        <th>Album</th>
+        <th>Thumb</th>
+        <th>Description</th>
+        <th>Owner</th>
+        <th></th>
+      </tr>
       @foreach($data as $album)
-        <li class="list-group-item flex-column">
-          <div class="d-flex w-100 justify-content-between">
-            <div>
-              @if($album->album_thumb)
-                {{--
-                  siccome sul db ho sia img reali caricate manualemte sia dati fake generati automaticamente devo fare un controlo
-                  se il path del file è locale(=reale) o remoto(=fake) mi sono fatto un metodo getPathAttribute nel modello
-                  Album che mi torna il path del file. $album->path mappa magicamente il metodo get|Path|Attribute
-                --}}
-                {{--<img width="120" src="{{asset('storage/'.$album->album_thumb)}}" alt="{{$album->album_name}}">--}}
-                <img width="120" src="{{asset($album->album_thumb)}}" alt="{{$album->album_name}}">
-              @endif
-              <h5 class="mb-1">{{$album->album_name}}</h5>
-              <p class="mb-1">{{$album->description}}</p>
-            </div>
-            <small>
-              <a href="{{route('photos.create')}}?aid={{$album->id}}"><i class="fas fa-plus-circle fa-2x"></i> New image</a>
-              @if($album->photos_count > 0)
-              <a href="{{route('albumImages', $album->id)}}"><i class="far fa-images fa-2x"></i> ({{$album->photos_count}})</a>
-              @endif
-              <a href="/albums/{{$album->id}}"><i class="fas fa-pencil-alt fa-2x"></i></a>
-              <a class="delete" href="/albums/{{$album->id}}"><i class="far fa-trash-alt fa-2x"></i></a>
-            </small>
-          </div>
-        </li>
+        <tr>
+          <td>{{$album->created_at->diffForHumans()}}</td>
+          <td>
+            {{$album->album_name}}
+          </td>
+          <td>
+            @if($album->album_thumb)
+              {{--
+                siccome sul db ho sia img reali caricate manualemte sia dati fake generati automaticamente devo fare un controlo
+                se il path del file è locale(=reale) o remoto(=fake) mi sono fatto un metodo getPathAttribute nel modello
+                Album che mi torna il path del file. $album->path mappa magicamente il metodo get|Path|Attribute
+              --}}
+              {{--<img width="120" src="{{asset('storage/'.$album->album_thumb)}}" alt="{{$album->album_name}}">--}}
+              <img width="100" src="{{asset($album->album_thumb)}}" alt="{{$album->album_name}}">
+            @endif
+          </td>
+          <td>{{$album->description}}</td>
+          <td>{{$album->user->fullName}}</td>
+          <td>
+            <a class="btn btn-success" title="New image" href="{{route('photos.create')}}?aid={{$album->id}}">
+              <i class="fas fa-plus-circle"></i>
+            </a>
+            @if($album->photos_count > 0)
+              <a class="btn btn-secondary" href="{{route('albumImages', $album->id)}}">
+                <i class="far fa-images"></i> ({{$album->photos_count}})
+              </a>
+            @endif
+            <a class="btn btn-primary" href="{{route('album.update', $album->id)}}">
+              <i class="fas fa-pencil-alt"></i>
+            </a>
+            <a class="btn btn-danger delete" href="{{route('album.delete', $album->id)}}">
+              <i class="far fa-trash-alt"></i>
+            </a>
+          </td>
+        </tr>
       @endforeach
-    </ul>
+    </table>
   @endif
 
   <div>
@@ -50,7 +68,7 @@
 
   </div>
 
-  <a class="btn btn-primary btn-lg btn-block" href="{{route('album.create')}}">Crate Album</a>
+  <a class="btn btn-primary btn-lg btn-block" href="{{route('album.create')}}">Crate new Album</a>
 
 @stop
 

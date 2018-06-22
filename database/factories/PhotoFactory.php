@@ -27,7 +27,7 @@
       'name'          => $faker->text(64),
       'description'   => $faker->text(128),
       'img_path'      => $faker->imageUrl(1000, 800, $faker->randomElement($randomCat)),
-      'album_id'      => Album::inRandomOrder()->first()->id,
+      'album_id'      => factory(App\Album::class)->make(),
       'created_at'    => Carbon::now()
     ];
   });

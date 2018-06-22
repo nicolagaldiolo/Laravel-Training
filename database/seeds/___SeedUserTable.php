@@ -20,10 +20,20 @@ class SeedUserTable extends Seeder
 
         User::truncate(); // tronco la tabella users se ci sono dati così posso lanciare il seed + volte
 
+        $me = User::create(
+            [
+                'name' => env('TEST_USER_NAME'),
+                'email' => env('TEST_USER_EMAIL'),
+                'password' => env('TEST_USER_PASSWORD')
 
+            ]
+        );
 
         //Alimento la tabella, utilizzando una Factory
-        factory(User::class, 70)->create();
+        $users = factory(User::class, 9)->create();
+        $users->push($me);
+
+        return $users;
         // come primo parametro passo il nome del modello, il numero di volte che deve essere eseguito e il metodo create scrive
         // fisicamente sul db, mentre se volessi semplicemente tornare dei dati posso usare il metodo make().
 

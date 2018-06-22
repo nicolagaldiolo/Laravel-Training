@@ -17,5 +17,7 @@ class SeedAlbumTable extends Seeder
       Album::truncate();
 
       factory(Album::class, 20)->create();
+
+
     }
 }

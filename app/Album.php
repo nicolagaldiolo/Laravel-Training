@@ -49,5 +49,9 @@ class Album extends Model
         return $this->belongsTo(User::class); // $this->belongsTo(User::class, 'user_id', 'id');
     }
 
+    public function categories(){
+        return $this->belongsToMany(Category::class);
+    }
+
 
 }

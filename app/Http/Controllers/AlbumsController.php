@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Album;
 use App\Photo;
 use App\User;
+use App\Category;
 use Illuminate\Http\Request;
 use App\Http\Requests\AlbumRequest;
 use App\Http\Requests\AlbumEditRequest;
@@ -132,10 +133,10 @@ class AlbumsController extends Controller
         return view('albums.edit', ['data' => $album]);
     }
 
-    function create($id = '')
+    function create()
     {
-
-        return view('albums.create');
+        $categories = Category::all();
+        return view('albums.create')->with('categories', $categories);
     }
 
     function save( AlbumRequest $request) // utilizzo una classe custom per la validazione, una classe che estende

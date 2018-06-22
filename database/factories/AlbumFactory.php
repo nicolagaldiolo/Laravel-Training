@@ -27,7 +27,7 @@
       'album_name'  => $faker->name,
       'description' => $faker->text(128),
       'album_thumb' => $faker->imageUrl(800, 800, $faker->randomElement($randomCat)),
-      'user_id'     => User::inRandomOrder()->first()->id, // utilizzo il model User per farmi tornare in ordine random il primo id di un album
+      'user_id'     => factory(App\User::class)->make(),
       'created_at'  => Carbon::now()
     ];
   });

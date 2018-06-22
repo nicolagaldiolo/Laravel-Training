@@ -17,9 +17,9 @@ use \App\Photo;
 
 // Posso risolvere la rotta con una funzione anonima clousure o con un controller
 
-Route::get('/', function () {
-  return view('welcome');
-});
+//Route::get('/', function () {
+//  return view('welcome');
+//});
 
 // il namespace del controller viene definito nel RouteServiceProvider ossia: App\Http\Controllers
 Route::get('/controller', 'welcomeController@index'); // nome_controller@nome_metodo
@@ -90,7 +90,19 @@ Route::group(
     });
 });
 
+/*
+Route::group(
+    [
+        'prefix' => 'gallery',
+    ], function(){
+    Route::get('albums', 'GalleryController@index' )->name('gallery.albums'); // con name definisco il nome della rotta, così se l'url dovesse cambiare il path di quella rotta, il riferimento rimane invariato, mi è comodo per i link o redirect.
+    Route::get('album/{album}/images', 'GalleryController@showAlbumImages')->name('gallery.albums.images');
+});
+*/
+
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/', 'GalleryController@index' )->name('gallery.albums'); // con name definisco il nome della rotta, così se l'url dovesse cambiare il path di quella rotta, il riferimento rimane invariato, mi è comodo per i link o redirect.
+Route::get('gallery/{album}/images', 'GalleryController@showAlbumImages')->name('gallery.albums.images');

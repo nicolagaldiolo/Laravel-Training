@@ -28,7 +28,7 @@ class AlbumsController extends Controller
         //$this->middleware('auth')->except('index'); // proteggo tutti i metodi eccetto uno o più metodi (se tanti uso array)
     }
 
-    function index(Request $request)
+    function index()
     {
         // Per RECUPERARE I DATI DELLO USER posso fare in due modi, con la facade Auth, oppure vi viene cmq iniettato nella request
         // 1- tramite Request $request->user();
@@ -39,33 +39,31 @@ class AlbumsController extends Controller
         // MODEL
         //$queryBuilder = Album::orderBy('id', 'desc')->with('photos'); // con il metodo with, passando il nome della relazione
         // viene aggiunto all'oggetto album anche un attributo relations dove all'inteno c'è l'array di tutte le foto
-        $queryBuilder = Album::orderBy('id', 'desc')->withCount('photos'); // con withCount non mi viene tornato l'elenco delle foto ma semplicemente viene aggiunto un nuovo attributo, come se fosse un nuovo campo, con il numero delle foto
-        $queryBuilder->where('user_id', $request->user()->id);
+        //$queryBuilder = Album::orderBy('id', 'desc')->with('categories')->withCount('photos'); // con withCount non mi viene tornato l'elenco delle foto ma semplicemente viene aggiunto un nuovo attributo, come se fosse un nuovo campo, con il numero delle foto
+        //$queryBuilder->where('user_id', $request->user()->id);
 
-        if ($request->has('id')) {
-            //$album -> where('id', '=', $request->input('id'));
-            $queryBuilder->where('id', $request->get('id')); // se la condizione è uguale posso omettere il segno uguale
-        }
-        if ($request->has('album_name')) {
-            $queryBuilder->where('album_name', 'like', '%' . $request->get('album_name') . '%');
-        }
-        //$album = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
-        $album = $queryBuilder->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
+        //if ($request->has('id')) {
+            //$albums -> where('id', '=', $request->input('id'));
+        //    $queryBuilder->where('id', $request->get('id')); // se la condizione è uguale posso omettere il segno uguale
+        //}
+        //if ($request->has('album_name')) {
+        //    $queryBuilder->where('album_name', 'like', '%' . $request->get('album_name') . '%');
+        //}
+        //$albums = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
+        //$albums = $queryBuilder->paginate(env('IMG_PER_PAGE')); // se li voglio paginati
 
-        //dd($album);
-
-
+        $albums = auth()->user()->albums()->with('categories', 'user')->withCount('photos')->get();
         /*
         // QUERY BUILDER
         $queryBuilder = DB::table('albums')->orderBy('id', 'desc');
         if ($request->has('id')) {
-        //$album -> where('id', '=', $request->input('id'));
+        //$albums -> where('id', '=', $request->input('id'));
         $queryBuilder -> where('id', $request->get('id')); // se la condizione è uguale posso omettere il segno uguale
         }
         if ($request->has('album_name')) {
         $queryBuilder -> where('album_name', 'like', '%' . $request->get('album_name') . '%');
         }
-        $album = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
+        $albums = $queryBuilder->get(); // creo la collection (array di dati), altrimenti senza il get sarebbe l'oggetto query builder
         */
 
         // QUERY GREZZE
@@ -82,12 +80,10 @@ class AlbumsController extends Controller
           $sql .= " AND album_name = :album_name";
         }
         $sql .= " ORDER BY id DESC";
-        $album = DB::select($sql, $where);
+        $albums = DB::select($sql, $where);
         */
 
-        //dd($album);
-
-        return view('albums.albums', ['data' => $album]);
+        return view('albums.albums', compact('albums'));
     }
 
     function show(Album $album, Request $request)
@@ -99,7 +95,7 @@ class AlbumsController extends Controller
         //$album = DB::table('albums')->where('id', $id)->get();
 
         //$album = Album::where('id', $id)->get(); // torna la collection con il dato
-        $album = Album::find($album->id); // torna l'oggetto Album
+        //$album = Album::find($album->id); // torna l'oggetto Album
 
         /////////// CONTROLLO AUTORIZZAZIONE AD ACCEDERE ALL'ALBUM ////////
 
@@ -126,16 +122,17 @@ class AlbumsController extends Controller
             //Potrei automaticamente proteggere tutti i metodi del controller chiamando authorizeResource nel costruttore passando il modello:
             //$this->authorizeResource(Album::class);
 
+        $album->load('categories');
+
+        $categories = Category::all();
 
 
-
-
-        return view('albums.edit', ['data' => $album]);
+        return view('albums.edit', compact('album', 'categories'));
     }
 
     function create()
     {
-        $categories = Category::all();
+        $categories = Auth()->user()->categories()->get();
         return view('albums.create')->with('categories', $categories);
     }
 
@@ -176,6 +173,7 @@ class AlbumsController extends Controller
 
 // MODEL 2
         //in alternativa posso creare una nuova instanza del model Album e creare il record, in qeusto modo non devo neanche dichiarare i campi fillable
+
         $album = new Album;
 
         $this->authorize('create', $album);
@@ -185,6 +183,9 @@ class AlbumsController extends Controller
         $album->album_thumb = '';
         $album->user_id = $request->user()->id;
         $res = $album->save();
+
+        $album->categories()->sync($request->categories);
+
 
         // siccome ho precedentemente salvato l'album, e quindi ho un id lo posso passare alla funzione
         if( $this->processFile($album->id, $album)){
@@ -247,6 +248,8 @@ class AlbumsController extends Controller
         $this->processFile($id, $album);
 
         $res = $album->save();
+
+        $album->categories()->sync($request->categories);
 
         $message = ($res > 0) ? 'Album aggiornato con successo' : 'Album non aggiornato';
         session()->flash('message', $message);

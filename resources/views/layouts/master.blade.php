@@ -39,6 +39,9 @@
         <li class="nav-item">
           <a class="nav-link" href="{{route('photos.create')}}">New photo</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{route('categories.index')}}">Category</a>
+        </li>
       @endauth
       <li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>

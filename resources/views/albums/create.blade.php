@@ -24,7 +24,7 @@
                 @endforeach
             </select>
         </div>
-        @endif()
+        @endif
 
         <div class="form-group">
             <label>Album thumb</label>

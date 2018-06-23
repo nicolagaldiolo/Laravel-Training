@@ -46,7 +46,7 @@ Route::get('/string', function () {
 Route::get('/json', function () {
   return ['Hello', 'World'];
 });
-/* ---- PROTEGGERE LE TORRE --- */
+/* ---- PROTEGGERE LE ROTTE --- */
 // posso proteggere le rotte in vari modi:
 
 // 1: PROTEGGERE LE ROTTE SINGOLARMENTE Aggiungengo il metodo middleware in fondo alla rotta e passando il nome del middleware
@@ -88,6 +88,8 @@ Route::group(
 
         return $usernoalbum;
     });
+
+    Route::resource('categories', 'CategoryController');
 });
 
 /*
@@ -104,5 +106,6 @@ Route::group(
 Auth::routes();
 
 //Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/', 'GalleryController@index' )->name('gallery.albums'); // con name definisco il nome della rotta, così se l'url dovesse cambiare il path di quella rotta, il riferimento rimane invariato, mi è comodo per i link o redirect.
+Route::get('/', 'GalleryController@index' )->name('gallery.albums');
+Route::get('gallery/albums/category/{category}', 'GalleryController@showAlbumsByCategory')->name('gallery.albums.category');
 Route::get('gallery/{album}/images', 'GalleryController@showAlbumImages')->name('gallery.albums.images');

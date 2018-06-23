@@ -50,7 +50,8 @@ class Album extends Model
     }
 
     public function categories(){
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class)
+            ->withTimestamps(); // con withTimestamps vado anche a popolare i campi di creazione e aggiornamento
     }
 
 

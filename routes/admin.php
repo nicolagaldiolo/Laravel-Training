@@ -12,9 +12,12 @@
 */
 
 Route::get('/', function () {
-  return view('admin');
+  return view('admin.index');
 });
 
 Route::get('/dashboard', function () {
   return view('admin_dashboard');
 });
+
+Route::resource('users', 'Admin\AdminUserController');
+Route::patch('users/{id}/restore', 'Admin\AdminUserController@restore')->name('users.restore');

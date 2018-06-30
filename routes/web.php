@@ -89,7 +89,7 @@ Route::group(
         return $usernoalbum;
     });
 
-    Route::resource('categories', 'CategoryController');
+    Route::resource('categories', 'CategoryController')->only('index', 'store', 'update', 'destroy');
 });
 
 /*

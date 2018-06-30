@@ -19,10 +19,10 @@ class SeedFakeDataPopulateTable extends Seeder
 
         $me = User::create(
             [
-                'name' => env('TEST_USER_NAME'),
-                'email' => env('TEST_USER_EMAIL'),
-                'password' => bcrypt(env('TEST_USER_PASSWORD'))
-
+                'name'      => env('TEST_USER_NAME'),
+                'email'     => env('TEST_USER_EMAIL'),
+                'password'  => bcrypt(env('TEST_USER_PASSWORD')),
+                'role'      => env('USER_ADMIN_ROLE')
             ]
         );
 

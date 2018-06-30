@@ -30,7 +30,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('categories.edit');
     }
 
     /**
@@ -43,13 +43,24 @@ class CategoryController extends Controller
     {
         $this->validate($request, $this->rules);
 
-        $category = auth()->user()->categories()->create( $request->only('name'));
+        $res = auth()->user()->categories()->create( $request->only('name'));
 
-        $message = ($category) ? 'Categoria creata con successo' : 'Categoria non creata';
-        session()->flash('message', $message);
+        // controllo se la richiesta si aspetta un json quindi è una chiamata ajax altrimenti faccio il redirect
+        if($request->expectsJson()){
 
-        return redirect()->route('categories.index');
+            $categories = auth()->user()->categories()->withCount('album')->latest()->paginate();
 
+            $message = ($res) ? 'Categoria creata con successo' : 'Categoria non creata';
+            session()->flash('message', $message);
+
+            return [
+                'message'   => (bool) $res ? 'Category created' : 'Category not created',
+                'status'    => (bool) $res,
+                'data'      => view('categories._list', compact('categories'))->render(),
+            ];
+
+        }
+        return;
     }
 
     /**
@@ -60,7 +71,6 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return $category;
     }
 
     /**
@@ -71,7 +81,6 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return $category;
     }
 
     /**
@@ -83,7 +92,24 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $category = auth()->user()->categories()->find($id);
+        $category->name = $request->get('name');
+        $res = $category->save();
+
+
+        // controllo se la richiesta si aspetta un json quindi è una chiamata ajax altrimenti faccio il redirect
+        if($request->expectsJson()){
+
+            $categories = auth()->user()->categories()->withCount('album')->latest()->paginate();
+            $message = ($res) ? 'Categoria aggiornata con successo' : 'Categoria non aggiornato';
+            session()->flash('message', $message);
+            return [
+                'message'   => (bool) $res ? 'Category updated' : 'Category not updated',
+                'status'    => (bool) $res,
+                'data'      => view('categories._list', compact('categories'))->render(),
+            ];
+        }
+        return;
     }
 
     /**
@@ -92,8 +118,19 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, Category $category)
     {
-        //
+        (bool) $res = $category->delete();
+
+        // controllo se la richiesta si aspetta un json quindi è una chiamata ajax altrimenti faccio il redirect
+        if($request->expectsJson()){
+            return [
+                'message' => $res ? 'Category deleted' : 'Category not deleted',
+                'status'   => (bool) $res
+            ];
+        }
+        return;
+
+
     }
 }

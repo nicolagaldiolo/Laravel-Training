@@ -15,7 +15,7 @@ class AddUserIdColumnCategory extends Migration
     {
         Schema::table('categories', function (Blueprint $table) {
             $table->integer('user_id')->unsigned()->index();
-            $table->foreign('user_id')->on('users')->references('id');
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

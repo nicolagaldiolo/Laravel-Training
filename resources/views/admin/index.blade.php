@@ -4,6 +4,12 @@
 
 @section('content')
 
+    @if(session()->has('message'))
+        @component('components.alert') {{-- chiamo il componente e posso passare altre variabili con array aggiuntivo come secondo parametro (se non le passo si incazza), ciò che passo come content viene catturato dalla variabile {{$slot}} --}}
+        {{session()->get('message')}}
+        @endcomponent
+    @endif
+
     <table id="userTable" class="table table-striped">
         <thead>
             <tr>

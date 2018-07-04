@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\AdminFormRequest;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -34,6 +35,12 @@ class AdminUserController extends Controller
             $users = User::select(['id', 'name','email','created_at','updated_at', 'deleted_at'])->withTrashed();
             return DataTables::of($users)->addColumn('action', function($user){
                 return $this->getActionButton($user);
+            })->editColumn('created_at', function($user){
+                return ($user->created_at) ? $user->created_at->diffForHumans() : '';
+            })->editColumn('updated_at', function($user){
+                return ($user->updated_at) ? $user->updated_at->diffForHumans() : '';
+            })->editColumn('deleted_at', function($user){
+                return ($user->deleted_at) ? $user->deleted_at->diffForHumans() : '';
             })->make(true);
         }
         return view('admin.index');
@@ -78,9 +85,9 @@ class AdminUserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(User $user)
     {
-        //
+        return view('admin.edit', compact('user'));
     }
 
     /**
@@ -90,9 +97,14 @@ class AdminUserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(AdminFormRequest $request, User $user)
     {
-        //
+
+        (bool) $res = $user->update( $request->validated());
+        $message = ($res) ? 'User modificato con successo' : 'User non modificato';
+        session()->flash('message', $message);
+
+        return redirect()->route('users.index');
     }
 
     /**

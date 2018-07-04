@@ -20,6 +20,15 @@ class User extends Authenticatable
         'name', 'email', 'password',
     ];
 
+    // definisco l'array di colonne che devono essere gestite come oggetti data(=carbon) e non come stringhe
+    // di default created_at e updated_at vengono nativamente gestite come oggetti carbon quindi la dichiarazione di queste due colonne è superflua
+    // occorre specificarlo però per deleted_at in quanto abbiamo introddotto il soft deletes e dobbiamo informare laravel che questa colonne deve essere gestire come data
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *

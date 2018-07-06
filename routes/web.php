@@ -14,6 +14,8 @@
 use \App\User;
 use \App\Album;
 use \App\Photo;
+use \App\Mail\TestMail;
+use \App\Mail\TestMailMarkdown;
 
 // Posso risolvere la rotta con una funzione anonima clousure o con un controller
 
@@ -109,3 +111,19 @@ Auth::routes();
 Route::get('/', 'GalleryController@index' )->name('gallery.albums');
 Route::get('gallery/albums/category/{category}', 'GalleryController@showAlbumsByCategory')->name('gallery.albums.category');
 Route::get('gallery/{album}/images', 'GalleryController@showAlbumImages')->name('gallery.albums.images');
+
+// SE VOGLIO FARE SEMPLICMENETE UN REDIRECT
+Route::redirect('/newpippo', '/albums');
+
+// SE VOGLIO CARICARE AL VOLO UNA VIEW
+Route::view('/newroute', 'welcome');
+
+Route::get('testmail', function(){
+    $user = User::get()->first();
+    \Illuminate\Support\Facades\Mail::to('galdiolo.nicola@gmail.com')->send(new TestMail($user));
+});
+
+Route::get('testmailmarkdown', function(){
+    $user = User::get()->first();
+    \Illuminate\Support\Facades\Mail::to('galdiolo.nicola@gmail.com')->send(new TestMailMarkdown($user));
+});
